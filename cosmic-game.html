@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌏 Cosmic + Chinese Zodiac Fusion Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fef9e6 0%, #fff0db 100%);
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .game-container {
+      max-width: 850px;
+      width: 100%;
+      background: #ffffffdd;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .game-panel {
+      background: white;
+      border-radius: 2rem;
+      padding: 1.8rem;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #c96f0e;
+      text-align: center;
+      margin-bottom: 0.3rem;
+    }
+
+    .sub {
+      text-align: center;
+      color: #b97f3a;
+      border-bottom: 2px solid #ffe0b5;
+      padding-bottom: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .question-text {
+      background: #fff5e8;
+      padding: 1rem;
+      border-radius: 1.5rem;
+      font-weight: 600;
+      color: #5a3e1b;
+      margin-bottom: 1.2rem;
+      border-left: 5px solid #f4b642;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .opt-btn {
+      background: #fffaf2;
+      border: 1px solid #ffd89a;
+      border-radius: 60px;
+      padding: 0.7rem 1.2rem;
+      display: flex;
+      gap: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: 500;
+      color: #4d3516;
+    }
+
+    .opt-btn:hover {
+      background: #ffe6c7;
+      transform: translateX(5px);
+    }
+
+    .opt-prefix {
+      background: #f7e3c6;
+      width: 30px;
+      height: 30px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .progress-bar-bg {
+      background: #f0e0cc;
+      border-radius: 20px;
+      height: 8px;
+      margin: 0.5rem 0 1rem 0;
+    }
+
+    .progress-fill {
+      background: #f4b642;
+      width: 0%;
+      height: 8px;
+      border-radius: 20px;
+    }
+
+    .result-card {
+      background: #fffef7;
+      border-radius: 1.5rem;
+      padding: 1.2rem;
+      border: 1px solid #ffe1b3;
+    }
+
+    .badge {
+      background: #fdefcf;
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #b45f1b;
+    }
+
+    .alignment-message {
+      background: #fff4e6;
+      padding: 0.8rem;
+      border-radius: 1rem;
+      margin: 0.8rem 0;
+      border-left: 4px solid #f0b34b;
+    }
+
+    input, select {
+      background: #fffcf5;
+      border: 1px solid #f0cd9b;
+      border-radius: 60px;
+      padding: 0.6rem 1rem;
+      width: 100%;
+      margin: 0.5rem 0;
+      font-family: inherit;
+    }
+
+    button {
+      background: #f7d9aa;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #ccaa7b;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <div class="game-panel">
+    <h1>🐉 COSMIC + CHINESE ZODIAC 🐅</h1>
+    <div class="sub">Personality quiz + Western sign + Chinese animal & element</div>
+    <div id="gameApp"></div>
+  </div>
+  <footer>🌙 Based on birth date + answers · Discover your full cosmic fingerprint</footer>
+</div>
+
+<script>
+  // ----- WESTERN ZODIAC -----
+  function getWesternZodiac(day, month) {
+    const dates = [
+      [21, 3, "Aries"], [20, 4, "Taurus"], [21, 5, "Gemini"],
+      [21, 6, "Cancer"], [23, 7, "Leo"], [23, 8, "Virgo"],
+      [23, 9, "Libra"], [23, 10, "Scorpio"], [22, 11, "Sagittarius"],
+      [22, 12, "Capricorn"], [20, 1, "Aquarius"], [19, 2, "Pisces"]
+    ];
+    for (let i = 0; i < dates.length; i++) {
+      let [d, m, sign] = dates[i];
+      if ((month === m && day >= d) || (month === (m === 3 ? 3 : m-1) && day < dates[(i+1)%12][1])) {
+        return sign;
+      }
+    }
+    return "Capricorn";
+  }
+
+  // ----- CHINESE ZODIAC (ANIMAL + ELEMENT) -----
+  const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
+  const elements = ["Wood", "Fire", "Earth", "Metal", "Water"];
+  // Element cycle: each year has an element based on last digit of year
+  function getChineseZodiac(year) {
+    const animal = animals[(year - 4) % 12];
+    const elementIndex = Math.floor((year - 4) % 10 / 2);
+    const element = elements[elementIndex];
+    return { animal, element };
+  }
+
+  // ----- QUIZ ELEMENT DETECTION -----
+  const QUESTIONS = [
+    { text: "🌿 When you face a problem, you...", options: [
+      { letter: "A", text: "Analyze logically", element: "Earth" },
+      { letter: "B", text: "Trust gut & act fast", element: "Fire" },
+      { letter: "C", text: "Talk with friends", element: "Air" },
+      { letter: "D", text: "Avoid & hope", element: "Water" }
+    ]},
+    { text: "🎉 Your ideal weekend...", options: [
+      { letter: "A", text: "Creative project", element: "Earth" },
+      { letter: "B", text: "Party / social", element: "Fire" },
+      { letter: "C", text: "Relax at home", element: "Water" },
+      { letter: "D", text: "Adventure outdoor", element: "Fire" }
+    ]},
+    { text: "⚡ What drives you?", options: [
+      { letter: "A", text: "Stability", element: "Earth" },
+      { letter: "B", text: "Freedom", element: "Fire" },
+      { letter: "C", text: "Deep bonds", element: "Water" },
+      { letter: "D", text: "Recognition", element: "Fire" }
+    ]},
+    { text: "💬 Handle criticism?", options: [
+      { letter: "A", text: "Improve quietly", element: "Water" },
+      { letter: "B", text: "Debate it", element: "Fire" },
+      { letter: "C", text: "Shut down", element: "Water" },
+      { letter: "D", text: "Prove them wrong", element: "Fire" }
+    ]},
+    { text: "☀️ Your energy style?", options: [
+      { letter: "A", text: "Calm & steady", element: "Earth" },
+      { letter: "B", text: "Intense & passionate", element: "Fire" },
+      { letter: "C", text: "Curious & adaptable", element: "Air" },
+      { letter: "D", text: "Warm & nurturing", element: "Water" }
+    ]}
+  ];
+
+  const elementTraits = {
+    Fire: "bold, passionate, energetic — you lead with action 🔥",
+    Earth: "practical, grounded, reliable — you build stability 🌍",
+    Air: "intellectual, social, curious — you love ideas 💨",
+    Water: "emotional, deep, intuitive — you feel everything 🌊"
+  };
+
+  let step = 0, answers = [], gameDone = false, quizElement = "";
+  let userBirthday = "", userWestern = "", userChineseAnimal = "", userChineseElement = "";
+
+  const app = document.getElementById("gameApp");
+
+  function render() {
+    if (!gameDone && step < QUESTIONS.length) renderQuiz();
+    else if (gameDone) renderFinal();
+    else if (!gameDone && step === QUESTIONS.length) finishQuiz();
+  }
+
+  function renderQuiz() {
+    const q = QUESTIONS[step];
+    const percent = (step / QUESTIONS.length) * 100;
+    let html = `<div class="progress-bar-bg"><div class="progress-fill" style="width:${percent}%"></div></div>`;
+    html += `<div class="question-text">${q.text}</div><div class="options">`;
+    q.options.forEach(opt => {
+      html += `<div class="opt-btn" data-letter="${opt.letter}"><span class="opt-prefix">${opt.letter}</span> ${opt.text}</div>`;
+    });
+    html += `</div><div style="font-size:0.8rem; margin-top:0.5rem;">Question ${step+1}/${QUESTIONS.length}</div>`;
+    app.innerHTML = html;
+    document.querySelectorAll(".opt-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        answers[step] = btn.dataset.letter;
+        if (step + 1 < QUESTIONS.length) { step++; render(); }
+        else { step++; finishQuiz(); }
+      });
+    });
+  }
+
+  function finishQuiz() {
+    // count element from answers
+    let counts = { Fire:0, Earth:0, Air:0, Water:0 };
+    for (let i=0; i<answers.length; i++) {
+      const opt = QUESTIONS[i].options.find(o => o.letter === answers[i]);
+      if (opt) counts[opt.element]++;
+    }
+    quizElement = Object.keys(counts).reduce((a,b) => counts[a] > counts[b] ? a : b, "Earth");
+    gameDone = true;
+    render();
+  }
+
+  function renderFinal() {
+    const traits = elementTraits[quizElement];
+    const html = `
+      <div class="result-card">
+        <div><span class="badge">✨ QUIZ RESULT ✨</span></div>
+        <div style="font-size:1.4rem; font-weight:bold; margin:0.3rem 0;">${quizElement} Element</div>
+        <div>${traits}</div>
+
+        <hr style="margin:1rem 0;">
+
+        <div><span class="badge">📅 YOUR BIRTH DATE</span></div>
+        <input type="date" id="birthDate" style="margin:0.5rem 0;">
+
+        <div id="astroInfo" class="alignment-message" style="background:#faf0e1;">✨ Enter your birthday to reveal Western + Chinese zodiac ✨</div>
+
+        <div id="comparison" class="alignment-message" style="background:#fff0e0;"></div>
+
+        <button id="resetBtn">🔄 Play Again</button>
+      </div>
+    `;
+    app.innerHTML = html;
+
+    const dateInput = document.getElementById("birthDate");
+    const astroDiv = document.getElementById("astroInfo");
+    const compareDiv = document.getElementById("comparison");
+
+    dateInput.addEventListener("change", () => {
+      if (!dateInput.value) return;
+      const [year, month, day] = dateInput.value.split("-").map(Number);
+      if (!year || !month || !day) return;
+      userWestern = getWesternZodiac(day, month);
+      const chinese = getChineseZodiac(year);
+      userChineseAnimal = chinese.animal;
+      userChineseElement = chinese.element;
+      
+      astroDiv.innerHTML = `
+        🌟 <strong>Western Zodiac:</strong> ${userWestern}<br>
+        🐉 <strong>Chinese Zodiac:</strong> ${userChineseAnimal} (${userChineseElement} element)<br>
+        📅 Born in ${year} · ${userChineseElement} ${userChineseAnimal} year
+      `;
+
+      // Personality fusion message
+      let alignmentMsg = "";
+      if (quizElement === userChineseElement) {
+        alignmentMsg = `🎯 Amazing! Your personality (${quizElement}) matches your Chinese zodiac element (${userChineseElement} ${userChineseAnimal}). The cosmos and ancient wisdom align!`;
+      } else {
+        alignmentMsg = `🌀 Interesting contrast: Your quiz shows ${quizElement} energy, but your Chinese element is ${userChineseElement} ${userChineseAnimal}. You blend both — a rare cosmic balance!`;
+      }
+      alignmentMsg += `<br><br>✨ ${userWestern} ${userChineseAnimal}融合✨ Your Western sign ${userWestern} adds another layer: ${userWestern} traits + ${userChineseAnimal} instincts = unique you.`;
+
+      compareDiv.innerHTML = alignmentMsg;
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      step = 0; answers = []; gameDone = false; quizElement = "";
+      userBirthday = ""; userWestern = ""; userChineseAnimal = ""; userChineseElement = "";
+      render();
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>
